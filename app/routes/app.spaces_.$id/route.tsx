@@ -7,8 +7,11 @@ import {
   LoaderFunctionArgs,
   redirect,
 } from "@remix-run/node";
+import { parseWithZod } from "@conform-to/zod";
+import { schema as editRoomSchema } from "./RoomForm";
+import { editRoom } from "~/services/room.server";
 
-const validIntents = ["reset"];
+const validIntents = ["reset", "edit-room"];
 
 export async function action({ request, params }: ActionFunctionArgs) {
   const id = params.id;
@@ -84,6 +87,20 @@ export async function action({ request, params }: ActionFunctionArgs) {
       )
     );
     return rooms;
+  } else if (intent === "edit-room") {
+    const submission = parseWithZod(formData, { schema: editRoomSchema });
+
+    if (submission.status !== "success") {
+      return json({ error: "Failed to edit room" });
+    }
+
+    const { code, color, corners, name, roomId } = submission.value;
+    try {
+      const room = await editRoom({ id: roomId, code, color, corners, name });
+      return json({ room, error: "" });
+    } catch (error) {
+      return json({ error: "Failed to edit room" });
+    }
   } else {
     throw new Response("Invalid intent", { status: 403 });
   }
@@ -137,17 +154,17 @@ export default function Space() {
 
   return (
     <div className="flex-1 flex">
-      {/* {space.smplrSpaceId ? (
+      {space.smplrSpaceId ? (
         <SpaceViewer
           cornersData={cornersData}
           deviceLocationData={[]}
           spaceId={space.smplrSpaceId}
         />
-      ) : ( */}
-      <div className="flex flex-1 items-center justify-center">
-        <p>No smplrspace</p>
-      </div>
-      {/* )} */}
+      ) : (
+        <div className="flex flex-1 items-center justify-center">
+          <p>No smplrspace</p>
+        </div>
+      )}
       <RightSidebar
         cornersData={cornersData}
         deviceLocationData={[]}
