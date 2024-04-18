@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "Device" ADD COLUMN     "color" TEXT NOT NULL DEFAULT '#0EA5E9';
+
+-- AlterTable
+ALTER TABLE "Room" ADD COLUMN     "color" TEXT NOT NULL DEFAULT '#00FF00';

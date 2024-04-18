@@ -1,41 +1,17 @@
-import type { MetaFunction } from "@remix-run/node";
-
-export const meta: MetaFunction = () => {
-  return [
-    { title: "New Remix App" },
-    { name: "description", content: "Welcome to Remix!" },
-  ];
-};
+import { Link } from "@remix-run/react";
+import { buttonVariants } from "~/components/ui/button";
+import { cn } from "~/lib/utils";
 
 export default function Index() {
   return (
-    <div style={{ fontFamily: "system-ui, sans-serif", lineHeight: "1.8" }}>
-      <h1>Welcome to Remix</h1>
-      <ul>
-        <li>
-          <a
-            target="_blank"
-            href="https://remix.run/tutorials/blog"
-            rel="noreferrer"
-          >
-            15m Quickstart Blog Tutorial
-          </a>
-        </li>
-        <li>
-          <a
-            target="_blank"
-            href="https://remix.run/tutorials/jokes"
-            rel="noreferrer"
-          >
-            Deep Dive Jokes App Tutorial
-          </a>
-        </li>
-        <li>
-          <a target="_blank" href="https://remix.run/docs" rel="noreferrer">
-            Remix Docs
-          </a>
-        </li>
-      </ul>
+    <div className="h-screen w-full flex flex-col items-center justify-center">
+      <h1 className="text-4xl font-extrabold mb-6">DEMO SIMATA</h1>
+      <Link
+        to="login"
+        className={cn(buttonVariants({ size: "lg" }), "text-lg")}
+      >
+        Log in
+      </Link>
     </div>
   );
 }
