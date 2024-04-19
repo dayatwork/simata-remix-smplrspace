@@ -1,5 +1,8 @@
 import { json, useLoaderData } from "@remix-run/react";
-import SpaceViewer, { CornerData } from "~/components/SpaceViewer";
+import SpaceViewer, {
+  CornerData,
+  LocationData,
+} from "~/components/SpaceViewer";
 import RightSidebar from "./RightSidebar";
 import prisma from "~/lib/prisma.server";
 import {
@@ -162,7 +165,10 @@ export async function loader({ params }: LoaderFunctionArgs) {
 
   const space = await prisma.space.findUnique({
     where: { id: Number(id) },
-    include: { rooms: true },
+    include: {
+      rooms: { orderBy: { id: "asc" } },
+      deviceCurrentLocations: { include: { device: true, room: true } },
+    },
   });
   if (!space) {
     return redirect("/app/spaces");
@@ -182,29 +188,34 @@ export async function loader({ params }: LoaderFunctionArgs) {
     };
   });
 
-  // space.rooms.forEach((room) => {
-  //   const roomCorners = room.corners as { x: number; z: number }[];
-  //   roomCorners.forEach((point, index) => {
-  //     cornersData.push({
-  //       id: `${room.name}.${index}`,
-  //       name: `${room.name} ${index}`,
-  //       position: { elevation: 1, levelIndex: 0, x: point.x, z: point.z },
-  //     });
-  //   });
-  // });
+  const deviceLocationsData: LocationData[] = space.deviceCurrentLocations.map(
+    (dcl) => ({
+      id: dcl.deviceId.toString(),
+      color: dcl.device.color,
+      name: dcl.device.name,
+      image: dcl.device.image || "https://placehold.co/400",
+      position: {
+        elevation: dcl.elevation,
+        levelIndex: dcl.levelIndex,
+        x: dcl.x,
+        z: dcl.z,
+      },
+    })
+  );
 
-  return json({ space, cornersData });
+  return json({ space, cornersData, deviceLocationsData });
 }
 
 export default function Space() {
-  const { space, cornersData } = useLoaderData<typeof loader>();
+  const { space, cornersData, deviceLocationsData } =
+    useLoaderData<typeof loader>();
 
   return (
     <div className="flex-1 flex">
       {space.smplrSpaceId ? (
         <SpaceViewer
           cornersData={cornersData}
-          deviceLocationData={[]}
+          deviceLocationsData={deviceLocationsData}
           smplrSpaceId={space.smplrSpaceId}
           spaceName={space.name}
           spaceDescription={space.description}
@@ -216,9 +227,10 @@ export default function Space() {
       )}
       <RightSidebar
         cornersData={cornersData}
-        deviceLocationData={[]}
+        deviceLocationData={deviceLocationsData}
         rooms={space.rooms}
         space={space}
+        devicesCurrentLocation={space.deviceCurrentLocations}
       />
     </div>
   );

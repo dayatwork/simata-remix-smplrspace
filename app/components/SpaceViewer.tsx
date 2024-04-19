@@ -1,10 +1,12 @@
 import { loadSmplrJs } from "@smplrspace/smplr-loader";
 import { Space } from "node_modules/@smplrspace/smplr-loader/dist/generated/smplr";
 import { useEffect, useRef, useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 
 export type LocationData = {
   id: string;
   name: string;
+  image: string;
   color: string;
   position: {
     levelIndex: number;
@@ -31,23 +33,39 @@ interface SmplrRoom extends UnknownData {
   name: string;
   color: string;
 }
+interface SmplrDevice extends UnknownData {
+  name: string;
+  color: string;
+  image: string;
+}
 
 interface Props {
   cornersData: CornerData[];
-  deviceLocationData: LocationData[];
+  deviceLocationsData: LocationData[];
   smplrSpaceId: string;
   spaceName: string;
   spaceDescription?: string;
 }
+
+type DeviceModalData = {
+  id: string;
+  name: string;
+  image: string;
+};
 
 export default function SpaceViewer({
   cornersData,
   smplrSpaceId: spaceId,
   spaceName,
   spaceDescription,
+  deviceLocationsData,
 }: Props) {
   const spaceRef = useRef<Space>();
   const [viewerReady, setViewerReady] = useState(false);
+  const [selectedDevice, setSelectedDevice] = useState<DeviceModalData | null>(
+    null
+  );
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     loadSmplrJs("esm")
@@ -70,6 +88,26 @@ export default function SpaceViewer({
     if (!viewerReady) {
       return;
     }
+    spaceRef.current?.addDataLayer({
+      id: "Origin",
+      type: "point",
+      color: "#FF0000",
+      shape: "sphere",
+      diameter: 0.2,
+      tooltip: () => `(0,0)`,
+      data: [
+        {
+          id: "origin",
+          position: { levelIndex: 0, elevation: 3.2, x: 0, z: 0 },
+        },
+      ],
+    });
+  }, [viewerReady]);
+
+  useEffect(() => {
+    if (!viewerReady) {
+      return;
+    }
     spaceRef.current?.addDataLayer<SmplrRoom>({
       id: "Corners",
       type: "polygon",
@@ -80,13 +118,48 @@ export default function SpaceViewer({
     });
   }, [viewerReady, cornersData]);
 
+  useEffect(() => {
+    if (!viewerReady) {
+      return;
+    }
+    spaceRef.current?.addDataLayer<SmplrDevice>({
+      id: "Devices",
+      type: "point",
+      shape: "sphere",
+      diameter: 0.4,
+      color: (d) => d.color || "#00FF00",
+      tooltip: (d) => d.name,
+      data: deviceLocationsData,
+      onClick: (d) => {
+        setIsModalOpen(true);
+        setSelectedDevice({
+          id: d.id?.toString() || "",
+          image: d.image,
+          name: d.name,
+        });
+      },
+    });
+  }, [viewerReady, deviceLocationsData]);
+
   return (
-    <div className="flex-1 h-full relative">
-      <div className="absolute top-4 left-6 z-10">
-        <h1 className="font-bold text-xl">{spaceName}</h1>
-        <p>{spaceDescription}</p>
+    <>
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{selectedDevice?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="flex items-center justify-center">
+            <img src={selectedDevice?.image || ""} alt={selectedDevice?.name} />
+          </div>
+        </DialogContent>
+      </Dialog>
+      <div className="flex-1 h-full relative">
+        <div className="absolute top-4 left-6 z-10">
+          <h1 className="font-bold text-xl">{spaceName}</h1>
+          <p>{spaceDescription}</p>
+        </div>
+        <div id="test" className="h-full"></div>
       </div>
-      <div id="test" className="h-full"></div>
-    </div>
+    </>
   );
 }

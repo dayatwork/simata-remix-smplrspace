@@ -75,7 +75,20 @@ export default function Devices() {
                   </TableCell>
                   <TableCell className="py-1">{device.code}</TableCell>
                   <TableCell className="py-1">{device.description}</TableCell>
-                  <TableCell className="py-1">-</TableCell>
+                  <TableCell className="py-1">
+                    <div>
+                      <p className="font-medium">
+                        {device.currentLocation?.space.name}
+                      </p>
+                      <p className="flex items-center gap-1">
+                        <span
+                          className="w-3 h-3 rounded-full"
+                          style={{ backgroundColor: device.color }}
+                        ></span>
+                        {device.currentLocation?.room.name}
+                      </p>
+                    </div>
+                  </TableCell>
                   <TableCell>
                     <div className="flex items-center justify-end">
                       <Link

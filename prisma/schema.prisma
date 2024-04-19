@@ -74,10 +74,10 @@ model DeviceCurrentLocation {
   room       Room     @relation(fields: [roomId], references: [id])
   roomId     Int
   timestamp  DateTime
-  levelIndex Int?
-  elevation  Float?
-  x          Float?
-  z          Float?
+  levelIndex Int      @default(0)
+  elevation  Float    @default(0)
+  x          Float    @default(0)
+  z          Float    @default(0)
 
   @@index([spaceId])
   @@index([roomId])
