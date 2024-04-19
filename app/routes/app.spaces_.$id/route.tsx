@@ -10,8 +10,10 @@ import {
 import { parseWithZod } from "@conform-to/zod";
 import { schema as editRoomSchema } from "./RoomForm";
 import { editRoom } from "~/services/room.server";
+import { schema as editSpaceSchema } from "./SpaceForm";
+import { editSpace } from "~/services/space.server";
 
-const validIntents = ["reset", "edit-room"];
+const validIntents = ["reset", "edit-room", "edit-space"];
 
 export async function action({ request, params }: ActionFunctionArgs) {
   const id = params.id;
@@ -101,6 +103,27 @@ export async function action({ request, params }: ActionFunctionArgs) {
     } catch (error) {
       return json({ error: "Failed to edit room" });
     }
+  } else if (intent === "edit-space") {
+    const submission = parseWithZod(formData, { schema: editSpaceSchema });
+
+    if (submission.status !== "success") {
+      return json({ error: "Failed to edit space" });
+    }
+
+    const { description, name, spaceId, imagePreview, smplrSpaceId } =
+      submission.value;
+    try {
+      const room = await editSpace({
+        id: spaceId,
+        name,
+        description,
+        smplrSpaceId,
+        imagePreview,
+      });
+      return json({ room, error: "" });
+    } catch (error) {
+      return json({ error: "Failed to edit room" });
+    }
   } else {
     throw new Response("Invalid intent", { status: 403 });
   }
@@ -150,25 +173,25 @@ export async function loader({ params }: LoaderFunctionArgs) {
 
 export default function Space() {
   const { space, cornersData } = useLoaderData<typeof loader>();
-  console.log({ space });
 
   return (
     <div className="flex-1 flex">
-      {space.smplrSpaceId ? (
+      {/* {space.smplrSpaceId ? (
         <SpaceViewer
           cornersData={cornersData}
           deviceLocationData={[]}
           spaceId={space.smplrSpaceId}
         />
-      ) : (
-        <div className="flex flex-1 items-center justify-center">
-          <p>No smplrspace</p>
-        </div>
-      )}
+      ) : ( */}
+      <div className="flex flex-1 items-center justify-center">
+        <p>No smplrspace</p>
+      </div>
+      {/* )} */}
       <RightSidebar
         cornersData={cornersData}
         deviceLocationData={[]}
         rooms={space.rooms}
+        space={space}
       />
     </div>
   );

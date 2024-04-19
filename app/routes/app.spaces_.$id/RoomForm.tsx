@@ -111,7 +111,7 @@ export default function RoomForm({ room }: Props) {
                     </Label>
                     <Input
                       type="number"
-                      className="h-[30px]"
+                      className="h-[30px] focus-visible:ring-0"
                       name={cornerFields.x.name}
                       defaultValue={cornerFields.x.initialValue}
                     />
@@ -127,7 +127,7 @@ export default function RoomForm({ room }: Props) {
                     </Label>
                     <Input
                       type="number"
-                      className="h-[30px]"
+                      className="h-[30px] focus-visible:ring-0"
                       name={cornerFields.z.name}
                       defaultValue={cornerFields.z.initialValue}
                     />
