@@ -1,5 +1,5 @@
 import { LoaderFunctionArgs } from "@remix-run/node";
-import { Link, Outlet } from "@remix-run/react";
+import { Link, Outlet, useLocation } from "@remix-run/react";
 import {
   Bell,
   CircleUser,
@@ -21,6 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "~/components/ui/sheet";
+import { cn } from "~/lib/utils";
 import { requireUser } from "~/utils/guard.server";
 
 const navigations: { icon: LucideIcon; label: string; to: string }[] = [
@@ -35,6 +36,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export default function AppLayout() {
+  const location = useLocation();
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[240px_1fr]">
       <div className="hidden border-r bg-muted/40 md:block">
@@ -54,7 +56,11 @@ export default function AppLayout() {
                 <Link
                   key={nav.to}
                   to={nav.to}
-                  className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary hover:bg-accent",
+                    location.pathname.startsWith(nav.to) &&
+                      "bg-foreground text-background hover:bg-foreground/90 hover:text-background"
+                  )}
                 >
                   <nav.icon className="h-5 w-5" />
                   {nav.label}
@@ -80,17 +86,21 @@ export default function AppLayout() {
             <SheetContent side="left" className="flex flex-col">
               <nav className="grid gap-2 text-lg font-medium">
                 <Link
-                  to="/app/admin"
+                  to="/app/home"
                   className="flex items-center gap-2 text-lg font-semibold mb-4"
                 >
                   <Package2 className="h-6 w-6" />
-                  <span className="sr-only">INAHEF 2024</span>
+                  <span className="sr-only">SIMATA</span>
                 </Link>
                 {navigations.map((nav) => (
                   <Link
                     key={nav.to}
                     to={nav.to}
-                    className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+                    className={cn(
+                      "mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 hover:text-foreground hover:bg-accent",
+                      location.pathname.startsWith(nav.to) &&
+                        "bg-foreground text-background hover:bg-foreground/90 hover:text-background"
+                    )}
                   >
                     <nav.icon className="h-5 w-5" />
                     {nav.label}

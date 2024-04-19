@@ -12,6 +12,7 @@ import { schema as editRoomSchema } from "./RoomForm";
 import { editRoom } from "~/services/room.server";
 import { schema as editSpaceSchema } from "./SpaceForm";
 import { editSpace } from "~/services/space.server";
+import { redirectWithToast } from "~/utils/toast.server";
 
 const validIntents = ["reset", "edit-room", "edit-space"];
 
@@ -93,36 +94,60 @@ export async function action({ request, params }: ActionFunctionArgs) {
     const submission = parseWithZod(formData, { schema: editRoomSchema });
 
     if (submission.status !== "success") {
-      return json({ error: "Failed to edit room" });
+      // return json({ error: "Failed to edit room" });
+      return redirectWithToast(`/app/spaces/${id}`, {
+        description: `Failed to edit room. ${submission.error}`,
+        type: "error",
+      });
     }
 
     const { code, color, corners, name, roomId } = submission.value;
     try {
       const room = await editRoom({ id: roomId, code, color, corners, name });
-      return json({ room, error: "" });
+      // return json({ room, error: "" });
+      return redirectWithToast(`/app/spaces/${id}`, {
+        description: `Room ${room.name} edited`,
+        type: "success",
+      });
     } catch (error) {
-      return json({ error: "Failed to edit room" });
+      // return json({ error: "Failed to edit room" });
+      return redirectWithToast(`/app/spaces/${id}`, {
+        description: `Failed to edit room. ${error}`,
+        type: "error",
+      });
     }
   } else if (intent === "edit-space") {
     const submission = parseWithZod(formData, { schema: editSpaceSchema });
 
     if (submission.status !== "success") {
-      return json({ error: "Failed to edit space" });
+      return redirectWithToast(`/app/spaces/${id}`, {
+        description: `Failed to edit space`,
+        type: "error",
+      });
+      // return json({ error: "Failed to edit space" });
     }
 
     const { description, name, spaceId, imagePreview, smplrSpaceId } =
       submission.value;
     try {
-      const room = await editSpace({
+      await editSpace({
         id: spaceId,
         name,
         description,
         smplrSpaceId,
         imagePreview,
       });
-      return json({ room, error: "" });
+      // return json({ room, error: "" });
+      return redirectWithToast(`/app/spaces/${spaceId}`, {
+        description: `Space edited`,
+        type: "success",
+      });
     } catch (error) {
-      return json({ error: "Failed to edit room" });
+      // return json({ error: "Failed to edit room" });
+      return redirectWithToast(`/app/spaces/${spaceId}`, {
+        description: `Failed to edit space`,
+        type: "error",
+      });
     }
   } else {
     throw new Response("Invalid intent", { status: 403 });
@@ -176,17 +201,19 @@ export default function Space() {
 
   return (
     <div className="flex-1 flex">
-      {/* {space.smplrSpaceId ? (
+      {space.smplrSpaceId ? (
         <SpaceViewer
           cornersData={cornersData}
           deviceLocationData={[]}
-          spaceId={space.smplrSpaceId}
+          smplrSpaceId={space.smplrSpaceId}
+          spaceName={space.name}
+          spaceDescription={space.description}
         />
-      ) : ( */}
-      <div className="flex flex-1 items-center justify-center">
-        <p>No smplrspace</p>
-      </div>
-      {/* )} */}
+      ) : (
+        <div className="flex flex-1 items-center justify-center">
+          <p>No smplrspace</p>
+        </div>
+      )}
       <RightSidebar
         cornersData={cornersData}
         deviceLocationData={[]}

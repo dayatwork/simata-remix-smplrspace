@@ -35,10 +35,17 @@ interface SmplrRoom extends UnknownData {
 interface Props {
   cornersData: CornerData[];
   deviceLocationData: LocationData[];
-  spaceId: string;
+  smplrSpaceId: string;
+  spaceName: string;
+  spaceDescription?: string;
 }
 
-export default function SpaceViewer({ cornersData, spaceId }: Props) {
+export default function SpaceViewer({
+  cornersData,
+  smplrSpaceId: spaceId,
+  spaceName,
+  spaceDescription,
+}: Props) {
   const spaceRef = useRef<Space>();
   const [viewerReady, setViewerReady] = useState(false);
 
@@ -74,7 +81,11 @@ export default function SpaceViewer({ cornersData, spaceId }: Props) {
   }, [viewerReady, cornersData]);
 
   return (
-    <div className="flex-1 h-full">
+    <div className="flex-1 h-full relative">
+      <div className="absolute top-4 left-6 z-10">
+        <h1 className="font-bold text-xl">{spaceName}</h1>
+        <p>{spaceDescription}</p>
+      </div>
       <div id="test" className="h-full"></div>
     </div>
   );
