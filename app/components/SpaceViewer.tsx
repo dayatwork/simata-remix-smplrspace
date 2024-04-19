@@ -113,7 +113,7 @@ export default function SpaceViewer({
       type: "polygon",
       color: (d) => d.color || "#00FF00",
       height: 0.21,
-      tooltip: (d) => d.name,
+      // tooltip: (d) => d.name,
       data: cornersData,
     });
   }, [viewerReady, cornersData]);

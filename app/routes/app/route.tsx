@@ -1,7 +1,7 @@
 import { LoaderFunctionArgs } from "@remix-run/node";
 import { Link, Outlet, useLocation } from "@remix-run/react";
 import {
-  Bell,
+  // Bell,
   CircleUser,
   Home,
   LucideIcon,
@@ -42,13 +42,19 @@ export default function AppLayout() {
       <div className="hidden border-r bg-muted/40 md:block">
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
-            <Link to="/app" className="flex items-center gap-2 font-semibold">
+            <Link
+              to="/app"
+              className="flex items-center gap-2 font-bold text-xl"
+            >
               SIMATA
             </Link>
-            <Button variant="outline" size="icon" className="ml-auto h-8 w-8">
+            <span className="ml-2 mt-0.5 bg-blue-600 px-2 py-0.5 rounded-full text-xs font-semibold text-white leading-none pb-1">
+              Demo App
+            </span>
+            {/* <Button variant="outline" size="icon" className="ml-auto h-8 w-8">
               <Bell className="h-4 w-4" />
               <span className="sr-only">Toggle notifications</span>
-            </Button>
+            </Button> */}
           </div>
           <div className="flex-1">
             <nav className="grid gap-1 items-start px-2 font-medium lg:px-4">
