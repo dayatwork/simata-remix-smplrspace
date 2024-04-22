@@ -28,18 +28,18 @@ const build = viteDevServer
 
 app.all("*", createRequestHandler({ build }));
 
-const client = mqtt.connect("ws://broker.emqx.io:8083/mqtt", {
-  port: 8083,
-  username: "",
-  password: "",
+const client = mqtt.connect(process.env.VITE_MQTT_URL, {
+  port: +process.env.VITE_MQTT_PORT,
+  username: process.env.VITE_MQTT_USERNAME || "",
+  password: process.env.VITE_MQTT_PASSWORD || "",
 });
 
 client.on("connect", () => {
-  client.subscribe("iot-data");
+  client.subscribe("sensor-data");
 });
 
 client.on("message", (topic, message) => {
-  if (message && topic === "iot-data") {
+  if (message && topic === "sensor-data") {
     const messageObj = JSON.parse(message);
 
     if (messageObj.apiKey !== process.env.MQTT_API_KEY) return;

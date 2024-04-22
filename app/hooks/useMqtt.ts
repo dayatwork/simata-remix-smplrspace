@@ -4,8 +4,8 @@ import mqtt, { MqttClient, IClientOptions } from "mqtt";
 const setting = {
   url: import.meta.env.VITE_MQTT_URL,
   config: {
-    username: import.meta.env.VITE_MQTT_USERNAME,
-    password: import.meta.env.VITE_MQTT_PASSWORD,
+    username: import.meta.env.VITE_MQTT_USERNAME || "",
+    password: import.meta.env.VITE_MQTT_PASSWORD || "",
     port: +import.meta.env.VITE_MQTT_PORT,
   },
 };
