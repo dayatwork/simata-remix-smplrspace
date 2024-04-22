@@ -10,6 +10,18 @@ const setting = {
   },
 };
 
+export type LocationChangedPayload = {
+  id: string;
+  deviceName: string;
+  roomName: string;
+  position: {
+    levelIndex: number;
+    elevation: number;
+    x: number;
+    z: number;
+  };
+};
+
 export default function useMqtt() {
   const [client, setClient] = useState<MqttClient | null>(null);
   const [isConnected, setIsConnected] = useState(false);

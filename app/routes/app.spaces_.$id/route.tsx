@@ -17,8 +17,8 @@ import { schema as editSpaceSchema } from "./SpaceForm";
 import { editSpace } from "~/services/space.server";
 import { redirectWithToast } from "~/utils/toast.server";
 import { useEffect, useState } from "react";
-import useMqtt from "~/hooks/useMqtt";
-import { LocationChangedPayload } from "~/services/location.server";
+import useMqtt, { type LocationChangedPayload } from "~/hooks/useMqtt";
+import toast from "react-hot-toast";
 
 const validIntents = ["reset", "edit-room", "edit-space"];
 
@@ -237,6 +237,10 @@ export default function Space() {
           return { ...data, position: newDeviceLocation.position };
         });
       });
+      toast(
+        `${newDeviceLocation.deviceName} move to ${newDeviceLocation.roomName}`,
+        { position: "bottom-center", icon: "🚀" }
+      );
     }
   }, [payload]);
 

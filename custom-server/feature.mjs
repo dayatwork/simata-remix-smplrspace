@@ -1,24 +1,7 @@
-import { client } from "~/lib/mqtt-client.server";
-import prisma from "~/lib/prisma.server";
-import { randomPointInsidePolygon } from "~/utils/polygon";
+import { prisma } from "../server.mjs";
+import { randomPointInsidePolygon } from "./util.mjs";
 
-export type LocationChangedPayload = {
-  id: string;
-  position: {
-    levelIndex: number;
-    elevation: number;
-    x: number;
-    z: number;
-  };
-};
-
-export async function uploadDeviceLocation({
-  deviceCode,
-  roomCode,
-}: {
-  roomCode: string;
-  deviceCode: string;
-}) {
+export async function uploadDeviceLocation(client, { deviceCode, roomCode }) {
   const result = await prisma.$transaction(async (tx) => {
     const device = await tx.device.findUnique({
       where: { code: deviceCode },
@@ -39,9 +22,10 @@ export async function uploadDeviceLocation({
       return device.currentLocation;
     }
 
-    const polygons = (room.corners as { x: number; z: number }[]).map(
-      (corner) => ({ x: corner.x, y: corner.z })
-    );
+    const polygons = room.corners.map((corner) => ({
+      x: corner.x,
+      y: corner.z,
+    }));
 
     // Generate location
     const point = randomPointInsidePolygon(polygons);
@@ -59,8 +43,10 @@ export async function uploadDeviceLocation({
     });
 
     // Publish to MQTT
-    const payload: LocationChangedPayload = {
+    const payload = {
       id: device.id.toString(),
+      deviceName: device.name,
+      roomName: room.name,
       position: {
         levelIndex: currentLocation.levelIndex,
         elevation: currentLocation.elevation,
