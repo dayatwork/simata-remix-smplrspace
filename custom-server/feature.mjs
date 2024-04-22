@@ -17,7 +17,7 @@ export async function uploadDeviceLocation(client, { deviceCode, roomCode }) {
       throw new Error("Room not found");
     }
 
-    if (device.currentLocation?.roomId === room.id) {
+    if (device.currentLocation && device.currentLocation.roomId === room.id) {
       // Skip the process if the room is still the same
       return device.currentLocation;
     }
@@ -30,23 +30,40 @@ export async function uploadDeviceLocation(client, { deviceCode, roomCode }) {
     // Generate location
     const point = randomPointInsidePolygon(polygons);
 
-    const currentLocation = await tx.deviceCurrentLocation.update({
+    const currentLocation = await tx.deviceCurrentLocation.upsert({
       where: { deviceId: device.id },
-      data: {
+      create: {
+        deviceId: device.id,
         spaceId: room.spaceId,
         roomId: room.id,
         levelIndex: 0,
         elevation: 1,
         x: point.x,
         z: point.y,
+        timestamp: new Date(),
+      },
+      update: {
+        spaceId: room.spaceId,
+        roomId: room.id,
+        levelIndex: 0,
+        elevation: 1,
+        x: point.x,
+        z: point.y,
+        timestamp: new Date(),
       },
     });
 
     // Publish to MQTT
     const payload = {
       id: device.id.toString(),
-      deviceName: device.name,
+      name: device.name,
+      code: device.code,
+      color: device.color,
+      image: device.image,
       roomName: room.name,
+      roomColor: room.color,
+      roomCode: room.code,
+      timestamp: currentLocation.timestamp,
       position: {
         levelIndex: currentLocation.levelIndex,
         elevation: currentLocation.elevation,

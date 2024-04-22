@@ -6,8 +6,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 export type LocationData = {
   id: string;
   name: string;
-  image: string;
+  code: string;
   color: string;
+  image: string;
+  roomName: string;
+  roomColor: string;
+  roomCode: string;
+  timestamp: string;
   position: {
     levelIndex: number;
     elevation: number;

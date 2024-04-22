@@ -197,6 +197,11 @@ export async function loader({ params }: LoaderFunctionArgs) {
       color: dcl.device.color,
       name: dcl.device.name,
       image: dcl.device.image || "https://placehold.co/400",
+      code: dcl.device.code,
+      roomName: dcl.room.name,
+      roomCode: dcl.room.code,
+      roomColor: dcl.room.color,
+      timestamp: dcl.timestamp.toISOString(),
       position: {
         elevation: dcl.elevation,
         levelIndex: dcl.levelIndex,
@@ -228,19 +233,40 @@ export default function Space() {
 
   useEffect(() => {
     if (payload.message && payload.topic === "location-changed") {
-      const newDeviceLocation = JSON.parse(
-        payload.message
-      ) as LocationChangedPayload;
+      const {
+        color,
+        id,
+        image,
+        name,
+        position,
+        roomName,
+        code,
+        roomCode,
+        roomColor,
+        timestamp,
+      } = JSON.parse(payload.message) as LocationChangedPayload;
+
       setDeviceLocationsData((prev) => {
-        return prev.map((data) => {
-          if (data.id !== newDeviceLocation.id) return data;
-          return { ...data, position: newDeviceLocation.position };
-        });
+        const notEditedData = prev.filter((data) => data.id !== id);
+        const editedData = {
+          id,
+          color,
+          image,
+          name,
+          position,
+          code,
+          roomName,
+          roomCode,
+          roomColor,
+          timestamp,
+        };
+        return [...notEditedData, editedData];
       });
-      toast(
-        `${newDeviceLocation.deviceName} move to ${newDeviceLocation.roomName}`,
-        { position: "bottom-center", icon: "🚀" }
-      );
+
+      toast(`${name} move to ${roomName}`, {
+        position: "bottom-center",
+        icon: "🚀",
+      });
     }
   }, [payload]);
 
@@ -264,7 +290,7 @@ export default function Space() {
         deviceLocationData={deviceLocationsData}
         rooms={space.rooms}
         space={space}
-        devicesCurrentLocation={space.deviceCurrentLocations}
+        // devicesCurrentLocation={deviceLocationsData}
       />
     </div>
   );

@@ -12,8 +12,14 @@ const setting = {
 
 export type LocationChangedPayload = {
   id: string;
-  deviceName: string;
+  name: string;
+  code: string;
+  color: string;
+  image: string;
   roomName: string;
+  roomCode: string;
+  roomColor: string;
+  timestamp: string;
   position: {
     levelIndex: number;
     elevation: number;

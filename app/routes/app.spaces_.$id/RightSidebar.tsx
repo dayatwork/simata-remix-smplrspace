@@ -1,4 +1,4 @@
-import { Device, DeviceCurrentLocation, Room, Space } from "@prisma/client";
+import { Room, Space } from "@prisma/client";
 import { SerializeFrom } from "@remix-run/node";
 import { LocationData, CornerData } from "~/components/SpaceViewer";
 import {
@@ -18,9 +18,9 @@ interface Props {
   cornersData: CornerData[];
   rooms: SerializeFrom<Room[]>;
   space: Space;
-  devicesCurrentLocation: SerializeFrom<
-    (DeviceCurrentLocation & { device: Device; room: Room })[]
-  >;
+  // devicesCurrentLocation: SerializeFrom<
+  //   (DeviceCurrentLocation & { device: Device; room: Room })[]
+  // >;
 }
 
 export default function RightSidebar({
@@ -28,8 +28,8 @@ export default function RightSidebar({
   deviceLocationData,
   rooms,
   space,
-  devicesCurrentLocation,
-}: Props) {
+}: // devicesCurrentLocation,
+Props) {
   console.log({ cornersData, deviceLocationData, rooms });
 
   return (
@@ -66,7 +66,7 @@ export default function RightSidebar({
         <TabsContent value="devices">
           <div className="p-1">
             <h3 className="text-sm font-semibold mb-2">Detected Devices</h3>
-            {devicesCurrentLocation.length === 0 && (
+            {deviceLocationData.length === 0 && (
               <div className="h-40 w-full border border-dashed rounded-xl flex items-center justify-center">
                 <p className="text-sm text-muted-foreground">
                   No devices detected in this space
@@ -74,47 +74,45 @@ export default function RightSidebar({
               </div>
             )}
             <ul className="space-y-2">
-              {devicesCurrentLocation.map((deviceCurrentLocation) => (
+              {deviceLocationData.map((data) => (
                 <li
-                  key={deviceCurrentLocation.device.id}
+                  key={data.id}
                   className="border rounded-lg p-1 flex gap-3 items-center"
                 >
-                  {deviceCurrentLocation.device.image ? (
+                  {data.image ? (
                     <img
-                      src={deviceCurrentLocation.device.image}
-                      alt={deviceCurrentLocation.device.name}
+                      src={data.image}
+                      alt={data.name}
                       className="w-14 h-14 rounded object-cover"
                     />
                   ) : (
                     <div className="w-14 h-14 bg-neutral-300" />
                   )}
                   <div>
-                    <p className="text-sm font-semibold">
-                      {deviceCurrentLocation.device.name}
-                    </p>
+                    <p className="text-sm font-semibold">{data.name}</p>
                     <p className="font-semibold text-xs flex items-center gap-1 -ml-px mb-1">
                       <span
                         className="w-3 h-3 rounded-full"
                         style={{
-                          backgroundColor: deviceCurrentLocation.device.color,
+                          backgroundColor: data.color,
                         }}
                       ></span>
-                      {deviceCurrentLocation.device.code}
+                      {data.code}
                     </p>
                     <p className="text-xs text-muted-foreground mb-1">
-                      {new Date(deviceCurrentLocation.timestamp).toLocaleString(
-                        "en-US",
-                        { dateStyle: "medium", timeStyle: "medium" }
-                      )}
+                      {new Date(data.timestamp).toLocaleString("en-US", {
+                        dateStyle: "medium",
+                        timeStyle: "medium",
+                      })}
                     </p>
                     <p className="font-semibold text-xs flex items-center gap-1 -ml-px mb-1">
                       <span
                         className="w-3 h-3"
                         style={{
-                          backgroundColor: deviceCurrentLocation.room.color,
+                          backgroundColor: data.roomColor,
                         }}
                       ></span>
-                      {deviceCurrentLocation.room.name}
+                      {data.roomName}
                     </p>
                   </div>
                 </li>
