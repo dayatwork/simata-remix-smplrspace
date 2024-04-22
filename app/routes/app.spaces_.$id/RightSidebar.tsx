@@ -77,7 +77,7 @@ export default function RightSidebar({
               {devicesCurrentLocation.map((deviceCurrentLocation) => (
                 <li
                   key={deviceCurrentLocation.device.id}
-                  className="border rounded-lg p-1 flex gap-2"
+                  className="border rounded-lg p-1 flex gap-3 items-center"
                 >
                   {deviceCurrentLocation.device.image ? (
                     <img
@@ -92,15 +92,24 @@ export default function RightSidebar({
                     <p className="text-sm font-semibold">
                       {deviceCurrentLocation.device.name}
                     </p>
+                    <p className="font-semibold text-xs flex items-center gap-1 -ml-px mb-1">
+                      <span
+                        className="w-3 h-3 rounded-full"
+                        style={{
+                          backgroundColor: deviceCurrentLocation.device.color,
+                        }}
+                      ></span>
+                      {deviceCurrentLocation.device.code}
+                    </p>
                     <p className="text-xs text-muted-foreground mb-1">
                       {new Date(deviceCurrentLocation.timestamp).toLocaleString(
                         "en-US",
                         { dateStyle: "medium", timeStyle: "medium" }
                       )}
                     </p>
-                    <p className="font-semibold text-xs flex items-center gap-1 -ml-0.5">
+                    <p className="font-semibold text-xs flex items-center gap-1 -ml-px mb-1">
                       <span
-                        className="w-3 h-3 rounded-full"
+                        className="w-3 h-3"
                         style={{
                           backgroundColor: deviceCurrentLocation.room.color,
                         }}

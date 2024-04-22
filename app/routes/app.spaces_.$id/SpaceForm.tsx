@@ -37,8 +37,6 @@ export default function SpaceForm({ space }: Props) {
     },
   });
 
-  console.log("errors", form.allErrors);
-
   return (
     <Form
       method="POST"

@@ -16,6 +16,9 @@ import { editRoom } from "~/services/room.server";
 import { schema as editSpaceSchema } from "./SpaceForm";
 import { editSpace } from "~/services/space.server";
 import { redirectWithToast } from "~/utils/toast.server";
+import { useEffect, useState } from "react";
+import useMqtt from "~/hooks/useMqtt";
+import { LocationChangedPayload } from "~/services/location.server";
 
 const validIntents = ["reset", "edit-room", "edit-space"];
 
@@ -207,8 +210,35 @@ export async function loader({ params }: LoaderFunctionArgs) {
 }
 
 export default function Space() {
-  const { space, cornersData, deviceLocationsData } =
-    useLoaderData<typeof loader>();
+  const {
+    space,
+    cornersData,
+    deviceLocationsData: _deviceLocationsData,
+  } = useLoaderData<typeof loader>();
+  const [deviceLocationsData, setDeviceLocationsData] =
+    useState(_deviceLocationsData);
+  const { isConnected, mqttSubscribe, payload } = useMqtt();
+
+  useEffect(() => {
+    if (isConnected) {
+      mqttSubscribe("location-changed");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isConnected]);
+
+  useEffect(() => {
+    if (payload.message && payload.topic === "location-changed") {
+      const newDeviceLocation = JSON.parse(
+        payload.message
+      ) as LocationChangedPayload;
+      setDeviceLocationsData((prev) => {
+        return prev.map((data) => {
+          if (data.id !== newDeviceLocation.id) return data;
+          return { ...data, position: newDeviceLocation.position };
+        });
+      });
+    }
+  }, [payload]);
 
   return (
     <div className="flex-1 flex">
