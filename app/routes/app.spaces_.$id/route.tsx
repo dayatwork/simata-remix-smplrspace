@@ -211,7 +211,14 @@ export async function loader({ params }: LoaderFunctionArgs) {
     })
   );
 
-  return json({ space, cornersData, deviceLocationsData });
+  const mqttConfig = {
+    url: process.env.VITE_MQTT_URL || "",
+    username: process.env.VITE_MQTT_USERNAME || "",
+    password: process.env.VITE_MQTT_PASSWORD || "",
+    port: process.env.VITE_MQTT_PORT ? +process.env.VITE_MQTT_PORT : 0,
+  };
+
+  return json({ space, cornersData, deviceLocationsData, mqttConfig });
 }
 
 export default function Space() {
@@ -219,10 +226,11 @@ export default function Space() {
     space,
     cornersData,
     deviceLocationsData: _deviceLocationsData,
+    mqttConfig,
   } = useLoaderData<typeof loader>();
   const [deviceLocationsData, setDeviceLocationsData] =
     useState(_deviceLocationsData);
-  const { isConnected, mqttSubscribe, payload } = useMqtt();
+  const { isConnected, mqttSubscribe, payload } = useMqtt({ ...mqttConfig });
 
   useEffect(() => {
     if (isConnected) {

@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import mqtt, { MqttClient, IClientOptions } from "mqtt";
 
-const setting = {
-  url: import.meta.env.VITE_MQTT_URL,
-  config: {
-    username: import.meta.env.VITE_MQTT_USERNAME || "",
-    password: import.meta.env.VITE_MQTT_PASSWORD || "",
-    port: +import.meta.env.VITE_MQTT_PORT,
-  },
-};
+// const setting = {
+//   url: import.meta.env.VITE_MQTT_URL,
+//   config: {
+//     username: import.meta.env.VITE_MQTT_USERNAME || "",
+//     password: import.meta.env.VITE_MQTT_PASSWORD || "",
+//     port: +import.meta.env.VITE_MQTT_PORT,
+//   },
+// };
 
 export type LocationChangedPayload = {
   id: string;
@@ -28,7 +28,17 @@ export type LocationChangedPayload = {
   };
 };
 
-export default function useMqtt() {
+export default function useMqtt({
+  password,
+  port,
+  url,
+  username,
+}: {
+  url: string;
+  username: string;
+  password: string;
+  port: number;
+}) {
   const [client, setClient] = useState<MqttClient | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [payload, setPayload] = useState<{ topic: string; message: string }>(
@@ -42,7 +52,6 @@ export default function useMqtt() {
 
   const mqttConnect = async () => {
     const clientId = getClientId();
-    const url = setting.url;
     const options: IClientOptions = {
       clientId,
       keepalive: 60,
@@ -50,7 +59,9 @@ export default function useMqtt() {
       reconnectPeriod: 300000,
       connectTimeout: 30000,
       rejectUnauthorized: false,
-      ...setting.config,
+      username,
+      password,
+      port,
     };
     const clientMqtt = mqtt.connect(url, options);
     setClient(clientMqtt);
