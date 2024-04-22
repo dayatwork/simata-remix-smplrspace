@@ -2,11 +2,11 @@ import { useState, useEffect } from "react";
 import mqtt, { MqttClient, IClientOptions } from "mqtt";
 
 const setting = {
-  url: "ws://broker.emqx.io:8083/mqtt",
+  url: import.meta.env.VITE_MQTT_URL,
   config: {
-    username: "",
-    password: "",
-    port: 8083,
+    username: import.meta.env.VITE_MQTT_USERNAME,
+    password: import.meta.env.VITE_MQTT_PASSWORD,
+    port: +import.meta.env.VITE_MQTT_PORT,
   },
 };
 
