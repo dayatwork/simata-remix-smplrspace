@@ -44,3 +44,8 @@ export async function editRoom({
   });
   return room;
 }
+
+export async function deleteRoom({ id }: { id: number }) {
+  const room = await prisma.room.delete({ where: { id } });
+  return room;
+}

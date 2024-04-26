@@ -68,10 +68,10 @@ model Device {
 
 model DeviceCurrentLocation {
   deviceId   Int      @unique
-  device     Device   @relation(fields: [deviceId], references: [id])
-  space      Space    @relation(fields: [spaceId], references: [id])
+  device     Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  space      Space    @relation(fields: [spaceId], references: [id], onDelete: Cascade)
   spaceId    Int
-  room       Room     @relation(fields: [roomId], references: [id])
+  room       Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
   roomId     Int
   timestamp  DateTime
   levelIndex Int      @default(0)
@@ -85,9 +85,9 @@ model DeviceCurrentLocation {
 
 model DeviceLocationHistory {
   id        Int      @id @default(autoincrement())
-  device    Device   @relation(fields: [deviceId], references: [id])
+  device    Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
   deviceId  Int
-  space     Space    @relation(fields: [spaceId], references: [id])
+  space     Space    @relation(fields: [spaceId], references: [id], onDelete: Cascade)
   spaceId   Int
   room      Room     @relation(fields: [roomId], references: [id])
   roomId    Int

@@ -11,15 +11,21 @@ import {
   redirect,
 } from "@remix-run/node";
 import { parseWithZod } from "@conform-to/zod";
-import { schema as editRoomSchema } from "./RoomForm";
-import { createRoom, editRoom } from "~/services/room.server";
-import { schema as editSpaceSchema } from "./SpaceForm";
-import { editSpace } from "~/services/space.server";
+import { schema as roomSchema } from "./RoomForm";
+import { createRoom, deleteRoom, editRoom } from "~/services/room.server";
+import { schema as spaceSchema } from "./SpaceForm";
+import { deleteSpace, editSpace } from "~/services/space.server";
 import { useEffect, useState } from "react";
 import useMqtt, { type LocationChangedPayload } from "~/hooks/useMqtt";
 import toast from "react-hot-toast";
 
-const validIntents = ["create-room", "edit-room", "edit-space"];
+const validIntents = [
+  "create-room",
+  "edit-room",
+  "delete-room",
+  "edit-space",
+  "delete-space",
+];
 
 export async function action({ request, params }: ActionFunctionArgs) {
   const id = params.id;
@@ -35,7 +41,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   }
 
   if (intent === "create-room") {
-    const submission = parseWithZod(formData, { schema: editRoomSchema });
+    const submission = parseWithZod(formData, { schema: roomSchema });
 
     if (submission.status !== "success") {
       return json({
@@ -44,6 +50,16 @@ export async function action({ request, params }: ActionFunctionArgs) {
         data: null,
         timestamp: new Date(),
         message: "Failed to create room",
+      });
+    }
+
+    if (submission.value._intent !== "create-room") {
+      return json({
+        success: false,
+        lastResult: submission.reply(),
+        data: null,
+        timestamp: new Date(),
+        message: "Failed to create room. Invalid intent",
       });
     }
 
@@ -75,7 +91,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
       });
     }
   } else if (intent === "edit-room") {
-    const submission = parseWithZod(formData, { schema: editRoomSchema });
+    const submission = parseWithZod(formData, { schema: roomSchema });
 
     if (submission.status !== "success") {
       return json({
@@ -120,8 +136,54 @@ export async function action({ request, params }: ActionFunctionArgs) {
         message: "Failed to edit room",
       });
     }
+  } else if (intent === "delete-room") {
+    const submission = parseWithZod(formData, { schema: roomSchema });
+
+    if (submission.status !== "success") {
+      return json({
+        success: false,
+        lastResult: submission.reply(),
+        data: null,
+        timestamp: new Date(),
+        message: "Failed to delete room",
+      });
+    }
+
+    if (submission.value._intent !== "delete-room") {
+      return json({
+        success: false,
+        lastResult: submission.reply(),
+        data: null,
+        timestamp: new Date(),
+        message: "Failed to delete room. Invalid intent",
+      });
+    }
+
+    const { roomId } = submission.value;
+
+    try {
+      const room = await deleteRoom({ id: roomId });
+
+      return json({
+        success: true,
+        lastResult: submission.reply(),
+        data: {
+          room,
+        },
+        timestamp: new Date(),
+        message: `Room ${room.name} deleted`,
+      });
+    } catch (error) {
+      return json({
+        success: false,
+        lastResult: submission.reply(),
+        data: null,
+        timestamp: new Date(),
+        message: "Failed to delete room",
+      });
+    }
   } else if (intent === "edit-space") {
-    const submission = parseWithZod(formData, { schema: editSpaceSchema });
+    const submission = parseWithZod(formData, { schema: spaceSchema });
 
     if (submission.status !== "success") {
       return json({
@@ -130,6 +192,16 @@ export async function action({ request, params }: ActionFunctionArgs) {
         data: null,
         timestamp: new Date(),
         message: "Failed to edit space",
+      });
+    }
+
+    if (submission.value._intent !== "edit-space") {
+      return json({
+        success: false,
+        lastResult: submission.reply(),
+        data: null,
+        timestamp: new Date(),
+        message: "Failed to edit space. Invalid intent",
       });
     }
 
@@ -159,6 +231,52 @@ export async function action({ request, params }: ActionFunctionArgs) {
         data: null,
         timestamp: new Date(),
         message: "Failed to edit space",
+      });
+    }
+  } else if (intent === "delete-space") {
+    const submission = parseWithZod(formData, { schema: spaceSchema });
+
+    if (submission.status !== "success") {
+      return json({
+        success: false,
+        lastResult: submission.reply(),
+        data: null,
+        timestamp: new Date(),
+        message: "Failed to delete space",
+      });
+    }
+
+    if (submission.value._intent !== "delete-space") {
+      return json({
+        success: false,
+        lastResult: submission.reply(),
+        data: null,
+        timestamp: new Date(),
+        message: "Failed to delete space. Invalid intent",
+      });
+    }
+
+    const { spaceId } = submission.value;
+
+    try {
+      const space = await deleteSpace({
+        id: spaceId,
+      });
+
+      return json({
+        success: true,
+        lastResult: submission.reply(),
+        data: { space },
+        timestamp: new Date(),
+        message: "Space deleted!",
+      });
+    } catch (error) {
+      return json({
+        success: false,
+        lastResult: submission.reply(),
+        data: null,
+        timestamp: new Date(),
+        message: "Failed to delete space",
       });
     }
   } else {

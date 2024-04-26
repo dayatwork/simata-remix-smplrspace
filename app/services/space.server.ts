@@ -21,3 +21,8 @@ export async function editSpace({
   });
   return space;
 }
+
+export async function deleteSpace({ id }: { id: number }) {
+  const space = await prisma.space.delete({ where: { id } });
+  return space;
+}
