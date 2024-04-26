@@ -80,7 +80,11 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export async function loader() {
-  const spaces = await prisma.space.findMany();
+  const spaces = await prisma.space.findMany({
+    orderBy: {
+      id: "asc",
+    },
+  });
   return json({ spaces });
 }
 

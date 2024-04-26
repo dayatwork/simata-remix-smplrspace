@@ -9,9 +9,12 @@ import {
 } from "~/components/ui/accordion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import RoomForm from "./RoomForm";
-import { Form } from "@remix-run/react";
+// import { Form } from "@remix-run/react";
 import { Button } from "~/components/ui/button";
 import SpaceForm from "./SpaceForm";
+import { useEffect, useState } from "react";
+import { Plus } from "lucide-react";
+import { useFetchers } from "@remix-run/react";
 
 interface Props {
   deviceLocationData: LocationData[];
@@ -24,13 +27,23 @@ interface Props {
 }
 
 export default function RightSidebar({
-  cornersData,
+  // cornersData,
   deviceLocationData,
   rooms,
   space,
 }: // devicesCurrentLocation,
 Props) {
-  console.log({ cornersData, deviceLocationData, rooms });
+  const [enableAddRoom, setEnableAddRoom] = useState(false);
+  const fetchers = useFetchers();
+  const createRoomFetcherData = fetchers.find(
+    (fetcher) => fetcher.key === "create-room"
+  )?.data;
+
+  useEffect(() => {
+    if (createRoomFetcherData?.success) {
+      setEnableAddRoom(false);
+    }
+  }, [createRoomFetcherData?.success]);
 
   return (
     <div className="w-72 border-l border-gray-200 p-4 flex flex-col gap-2 h-[calc(100vh-60px)] overflow-auto">
@@ -57,10 +70,32 @@ Props) {
                   </div>
                 </AccordionTrigger>
                 <AccordionContent>
-                  <RoomForm room={room} />
+                  <RoomForm room={room} intent="edit-room" />
                 </AccordionContent>
               </AccordionItem>
             ))}
+            {enableAddRoom ? (
+              <div className="mt-4">
+                <div className="flex gap-2 items-center text-sm font-semibold">
+                  <span className="w-4 h-4 rounded-full bg-neutral-500 animate-pulse"></span>
+                  <span>Create New Room</span>
+                </div>
+                <RoomForm
+                  intent="create-room"
+                  onCancel={() => setEnableAddRoom(false)}
+                />
+              </div>
+            ) : (
+              <Button
+                variant="outline"
+                className="mt-4 w-full h-8 text-xs"
+                size="sm"
+                onClick={() => setEnableAddRoom(true)}
+              >
+                <Plus className="w-3 h-3 mr-1" />
+                Add Room
+              </Button>
+            )}
           </Accordion>
         </TabsContent>
         <TabsContent value="devices">
@@ -121,7 +156,7 @@ Props) {
           </div>
         </TabsContent>
       </Tabs>
-      <Form
+      {/* <Form
         method="post"
         onSubmit={(event) => {
           const response = confirm("Please confirm you want to reset the room");
@@ -134,7 +169,7 @@ Props) {
         <Button variant="destructive" type="submit" className="h-8">
           Reset Room
         </Button>
-      </Form>
+      </Form> */}
     </div>
   );
 }

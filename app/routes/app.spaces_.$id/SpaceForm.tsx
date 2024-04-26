@@ -1,12 +1,15 @@
 import { useForm } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod";
 import { Space } from "@prisma/client";
-import { Form, useNavigation } from "@remix-run/react";
+import { useFetcher } from "@remix-run/react";
 import { z } from "zod";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
+import { action as spaceAction } from "./route";
+import { useEffect } from "react";
+import toast from "react-hot-toast";
 
 export const schema = z.object({
   _intent: z.literal("edit-space"),
@@ -22,9 +25,18 @@ type Props = {
 };
 
 export default function SpaceForm({ space }: Props) {
-  const navigation = useNavigation();
-  const submitting = navigation.state !== "idle";
+  const fetcher = useFetcher<typeof spaceAction>({ key: "edit-space" });
+  const submitting = fetcher.state !== "idle";
+  const fetcherData = fetcher.data;
+
+  useEffect(() => {
+    if (fetcherData?.success) {
+      toast.success(fetcherData.message);
+    }
+  }, [fetcherData]);
+
   const [form, fields] = useForm({
+    lastResult: fetcher.data?.lastResult,
     shouldValidate: "onSubmit",
     onValidate({ formData }) {
       return parseWithZod(formData, { schema });
@@ -38,7 +50,7 @@ export default function SpaceForm({ space }: Props) {
   });
 
   return (
-    <Form
+    <fetcher.Form
       method="POST"
       className="px-2 space-y-2 py-2"
       id={form.id}
@@ -100,6 +112,6 @@ export default function SpaceForm({ space }: Props) {
           Save
         </Button>
       </div>
-    </Form>
+    </fetcher.Form>
   );
 }
