@@ -221,7 +221,9 @@ export default function Spaces() {
               <div>
                 <div className="px-4 py-3">
                   <h2 className="text-lg font-semibold mb-1">{space.name}</h2>
-                  <p className="text-muted-foreground">{space.description}</p>
+                  <p className="text-muted-foreground text-sm">
+                    {space.description}
+                  </p>
                 </div>
                 <Separator />
                 <div className="px-4 py-3">
