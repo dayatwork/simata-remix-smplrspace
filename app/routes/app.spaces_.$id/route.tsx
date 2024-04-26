@@ -50,6 +50,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
         data: null,
         timestamp: new Date(),
         message: "Failed to create room",
+        intent,
       });
     }
 
@@ -60,6 +61,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
         data: null,
         timestamp: new Date(),
         message: "Failed to create room. Invalid intent",
+        intent,
       });
     }
 
@@ -74,12 +76,13 @@ export async function action({ request, params }: ActionFunctionArgs) {
       });
       return json({
         success: true,
-        lastResult: submission.reply(),
+        lastResult: null,
         data: {
           room,
         },
         timestamp: new Date(),
         message: `New room created`,
+        intent,
       });
     } catch (error) {
       return json({
@@ -88,6 +91,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
         data: null,
         timestamp: new Date(),
         message: `Failed to create room`,
+        intent,
       });
     }
   } else if (intent === "edit-room") {
@@ -100,6 +104,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
         data: null,
         timestamp: new Date(),
         message: "Failed to edit room",
+        intent,
       });
     }
 
@@ -110,6 +115,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
         data: null,
         timestamp: new Date(),
         message: "Failed to edit room. Invalid intent",
+        intent,
       });
     }
 
@@ -120,12 +126,13 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
       return json({
         success: true,
-        lastResult: submission.reply(),
+        lastResult: null,
         data: {
           room,
         },
         timestamp: new Date(),
         message: `Room ${room.name} edited`,
+        intent,
       });
     } catch (error) {
       return json({
@@ -134,6 +141,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
         data: null,
         timestamp: new Date(),
         message: "Failed to edit room",
+        intent,
       });
     }
   } else if (intent === "delete-room") {
@@ -146,6 +154,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
         data: null,
         timestamp: new Date(),
         message: "Failed to delete room",
+        intent,
       });
     }
 
@@ -156,6 +165,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
         data: null,
         timestamp: new Date(),
         message: "Failed to delete room. Invalid intent",
+        intent,
       });
     }
 
@@ -172,6 +182,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
         },
         timestamp: new Date(),
         message: `Room ${room.name} deleted`,
+        intent,
       });
     } catch (error) {
       return json({
@@ -180,6 +191,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
         data: null,
         timestamp: new Date(),
         message: "Failed to delete room",
+        intent,
       });
     }
   } else if (intent === "edit-space") {
@@ -192,6 +204,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
         data: null,
         timestamp: new Date(),
         message: "Failed to edit space",
+        intent,
       });
     }
 
@@ -202,6 +215,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
         data: null,
         timestamp: new Date(),
         message: "Failed to edit space. Invalid intent",
+        intent,
       });
     }
 
@@ -223,6 +237,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
         data: { space },
         timestamp: new Date(),
         message: "Space edited!",
+        intent,
       });
     } catch (error) {
       return json({
@@ -231,6 +246,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
         data: null,
         timestamp: new Date(),
         message: "Failed to edit space",
+        intent,
       });
     }
   } else if (intent === "delete-space") {
@@ -243,6 +259,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
         data: null,
         timestamp: new Date(),
         message: "Failed to delete space",
+        intent,
       });
     }
 
@@ -253,6 +270,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
         data: null,
         timestamp: new Date(),
         message: "Failed to delete space. Invalid intent",
+        intent,
       });
     }
 
@@ -269,6 +287,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
         data: { space },
         timestamp: new Date(),
         message: "Space deleted!",
+        intent,
       });
     } catch (error) {
       return json({
@@ -277,6 +296,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
         data: null,
         timestamp: new Date(),
         message: "Failed to delete space",
+        intent,
       });
     }
   } else {

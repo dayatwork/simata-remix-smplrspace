@@ -77,10 +77,9 @@ export default function RoomForm(props: Props) {
   // const submitting = navigation.state !== "idle";
   const submitting = fetcher.state === "submitting";
   const fetcherData = fetcher.data;
-
   const [form, fields] = useForm({
-    lastResult: fetcherData?.lastResult,
-    shouldValidate: "onSubmit",
+    // lastResult: fetcherData?.lastResult,
+    shouldValidate: "onBlur",
     onValidate({ formData }) {
       return parseWithZod(formData, { schema });
     },
@@ -95,24 +94,12 @@ export default function RoomForm(props: Props) {
         : undefined,
   });
   const corners = fields.corners.getFieldList();
-  const reset = form.reset;
 
   useEffect(() => {
-    if (fetcherData?.success) {
-      // toast.success(fetcherData.message);
-
+    if (fetcherData?.success && fetcherData.intent === "delete-room") {
       setOpenDeleteModal(false);
     }
   }, [fetcherData, form]);
-
-  useEffect(() => {
-    if (props.intent === "create-room" && fetcherData?.success) {
-      reset();
-    }
-  }, [reset, props.intent, fetcherData?.success]);
-
-  // console.log({ name: fields.name.initialValue });
-  // console.log({ code: fields.code.initialValue });
 
   return (
     <>
@@ -166,25 +153,57 @@ export default function RoomForm(props: Props) {
           <input type="hidden" name="_intent" value={props.intent} />
         )}
         <div className="grid gap-1">
-          <Label htmlFor="name" className="text-xs">
-            Room Name
-          </Label>
+          <div className="flex justify-between">
+            <Label
+              htmlFor="name"
+              className={cn(
+                "text-xs",
+                fields.name.errors ? "text-red-600" : ""
+              )}
+            >
+              Room Name
+            </Label>
+            {fields.name.errors ? (
+              <p role="alert" className="text-xs text-red-600 font-semibold">
+                {fields.name.errors}
+              </p>
+            ) : null}
+          </div>
           <Input
             id="name"
             name="name"
-            className="h-[30px] px-2 focus-visible:ring-0"
+            className={cn(
+              "h-[30px] px-2 focus-visible:ring-0",
+              fields.name.errors ? "border-red-600" : ""
+            )}
             defaultValue={fields.name.initialValue || ""}
           />
         </div>
         <div className="flex items-center gap-2">
           <div className="grid gap-1">
-            <Label htmlFor="code" className="text-xs">
-              Room Code
-            </Label>
+            <div className="flex justify-between">
+              <Label
+                htmlFor="code"
+                className={cn(
+                  "text-xs",
+                  fields.code.errors ? "text-red-600" : ""
+                )}
+              >
+                Room Code
+              </Label>
+              {fields.code.errors ? (
+                <p role="alert" className="text-xs text-red-600 font-semibold">
+                  {fields.code.errors}
+                </p>
+              ) : null}
+            </div>
             <Input
               id="code"
               name="code"
-              className="h-[30px] px-2 focus-visible:ring-0"
+              className={cn(
+                "h-[30px] px-2 focus-visible:ring-0",
+                fields.code.errors ? "border-red-600" : ""
+              )}
               defaultValue={fields.code.initialValue || ""}
             />
           </div>
