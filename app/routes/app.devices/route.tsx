@@ -15,6 +15,9 @@ import prisma from "~/lib/prisma.server";
 export async function loader() {
   const devices = await prisma.device.findMany({
     include: { currentLocation: { include: { room: true, space: true } } },
+    orderBy: {
+      id: "asc",
+    },
   });
 
   return json({ devices });
@@ -26,7 +29,7 @@ export default function Devices() {
 
   return (
     <main className="flex-1 flex">
-      <div className="flex-1 py-6 px-8">
+      <div className="flex-1 py-6 px-8 transition-all">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-xl font-semibold">Devices</h1>
           <Link to="new" className={buttonVariants()}>

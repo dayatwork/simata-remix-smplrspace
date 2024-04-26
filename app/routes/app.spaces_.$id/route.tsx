@@ -18,6 +18,9 @@ import { deleteSpace, editSpace } from "~/services/space.server";
 import { useEffect, useState } from "react";
 import useMqtt, { type LocationChangedPayload } from "~/hooks/useMqtt";
 import toast from "react-hot-toast";
+import ShortUniqueId from "short-unique-id";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { s3Client } from "~/lib/s3.server";
 
 const validIntents = [
   "create-room",
@@ -222,13 +225,31 @@ export async function action({ request, params }: ActionFunctionArgs) {
     const { description, name, spaceId, imagePreview, smplrSpaceId } =
       submission.value;
 
+    const uid = new ShortUniqueId({ length: 10 });
+    const fileId = uid.randomUUID();
+    const fileName = `spaces/${fileId}.${imagePreview.name
+      .split(".")
+      .slice(-1)}`;
+
+    const command = new PutObjectCommand({
+      Bucket: process.env.S3_BUCKET_NAME,
+      Key: fileName,
+      Body: Buffer.from(await imagePreview.arrayBuffer()),
+      ContentType: imagePreview.type,
+      ACL: "public-read",
+    });
+
+    await s3Client.send(command);
+
+    const url = `${process.env.S3_END_POINT}/${process.env.S3_BUCKET_NAME}/${fileName}`;
+
     try {
       const space = await editSpace({
         id: spaceId,
         name,
         description,
         smplrSpaceId,
-        imagePreview,
+        imagePreview: url,
       });
 
       return json({

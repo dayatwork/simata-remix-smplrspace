@@ -1,3 +1,4 @@
+import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { useForm } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod";
 import { ActionFunctionArgs, json } from "@remix-run/node";
@@ -7,12 +8,14 @@ import {
   useNavigate,
   useNavigation,
 } from "@remix-run/react";
+import ShortUniqueId from "short-unique-id";
 import { z } from "zod";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
 import prisma from "~/lib/prisma.server";
+import { s3Client } from "~/lib/s3.server";
 import { redirectWithToast } from "~/utils/toast.server";
 
 export const schema = z.object({
@@ -20,7 +23,7 @@ export const schema = z.object({
   code: z.string(),
   description: z.string(),
   color: z.string().optional(),
-  image: z.string().url().optional(),
+  image: z.instanceof(File, { message: "Image preview is required" }),
 });
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -34,9 +37,25 @@ export async function action({ request }: ActionFunctionArgs) {
 
   const { code, description, name, color, image } = submission.value;
 
+  const uid = new ShortUniqueId({ length: 10 });
+  const fileId = uid.randomUUID();
+  const fileName = `devices/${fileId}.${image.name.split(".").slice(-1)}`;
+
+  const command = new PutObjectCommand({
+    Bucket: process.env.S3_BUCKET_NAME,
+    Key: fileName,
+    Body: Buffer.from(await image.arrayBuffer()),
+    ContentType: image.type,
+    ACL: "public-read",
+  });
+
+  await s3Client.send(command);
+
+  const url = `${process.env.S3_END_POINT}/${process.env.S3_BUCKET_NAME}/${fileName}`;
+
   try {
     await prisma.device.create({
-      data: { code, description, name, color, image },
+      data: { code, description, name, color, image: url },
     });
 
     return redirectWithToast("/app/devices", {
@@ -69,6 +88,7 @@ export default function RegisterDevice() {
       <h2 className="font-semibold text-lg mb-4">Register New Device</h2>
       <Form
         method="post"
+        encType="multipart/form-data"
         id={form.id}
         onSubmit={form.onSubmit}
         className="space-y-4"
@@ -117,7 +137,8 @@ export default function RegisterDevice() {
           <Input
             id="image"
             name="image"
-            defaultValue={fields.image.initialValue}
+            // defaultValue={fields.image.initialValue}
+            type="file"
           />
           {fields.image.errors ? (
             <p role="alert" className="text-sm font-semibold text-red-600">

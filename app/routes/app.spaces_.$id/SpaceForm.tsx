@@ -25,7 +25,7 @@ export const schema = z.discriminatedUnion("_intent", [
     name: z.string(),
     description: z.string(),
     smplrSpaceId: z.string().optional(),
-    imagePreview: z.string().url().optional(),
+    imagePreview: z.instanceof(File, { message: "Image preview is required" }),
   }),
   z.object({
     _intent: z.literal("delete-space"),
@@ -67,7 +67,6 @@ export default function SpaceForm({ space }: Props) {
     defaultValue: {
       name: space.name,
       description: space.description,
-      imagePreview: space.imagePreview,
       smplrSpaceId: space.smplrSpaceId,
     },
   });
@@ -105,6 +104,7 @@ export default function SpaceForm({ space }: Props) {
       </Dialog>
       <fetcher.Form
         method="POST"
+        encType="multipart/form-data"
         className="px-2 space-y-2 py-2"
         id={form.id}
         onSubmit={form.onSubmit}
@@ -149,11 +149,18 @@ export default function SpaceForm({ space }: Props) {
           <Label htmlFor="imagePreview" className="text-xs">
             Image Preview (URL)
           </Label>
+          {space.imagePreview ? (
+            <img
+              src={space.imagePreview}
+              alt="preview"
+              className="rounded-lg"
+            />
+          ) : null}
           <Input
             id="imagePreview"
             name="imagePreview"
-            className="h-[30px] px-2 focus-visible:ring-0"
-            defaultValue={fields.imagePreview.initialValue}
+            className="px-2 focus-visible:ring-0 flex"
+            type="file"
           />
         </div>
         <div className="flex justify-between pt-2">

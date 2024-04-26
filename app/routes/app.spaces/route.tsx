@@ -51,7 +51,8 @@ export async function action({ request }: ActionFunctionArgs) {
   const { description, imagePreview, name, smplrSpaceId } = submission.value;
 
   const uid = new ShortUniqueId({ length: 10 });
-  const fileName = `spaces/${uid}.${imagePreview.name.split(".").slice(-1)}`;
+  const fileId = uid.randomUUID();
+  const fileName = `spaces/${fileId}.${imagePreview.name.split(".").slice(-1)}`;
 
   const command = new PutObjectCommand({
     Bucket: process.env.S3_BUCKET_NAME,
