@@ -26,6 +26,7 @@ import prisma from "~/lib/prisma.server";
 import { s3Client } from "~/lib/s3.server";
 import { useForm } from "@conform-to/react";
 import toast from "react-hot-toast";
+import { Separator } from "~/components/ui/separator";
 
 export const schema = z.object({
   name: z.string(),
@@ -85,6 +86,7 @@ export async function loader() {
     orderBy: {
       id: "asc",
     },
+    include: { rooms: true, deviceCurrentLocations: true },
   });
   return json({ spaces });
 }
@@ -216,9 +218,41 @@ export default function Spaces() {
               ) : (
                 <div className="bg-neutral-300 h-52 w-full"></div>
               )}
-              <div className="p-4">
-                <h2 className="text-lg font-semibold mb-1">{space.name}</h2>
-                <p className="text-muted-foreground">{space.description}</p>
+              <div>
+                <div className="px-4 py-3">
+                  <h2 className="text-lg font-semibold mb-1">{space.name}</h2>
+                  <p className="text-muted-foreground">{space.description}</p>
+                </div>
+                <Separator />
+                <div className="px-4 py-3">
+                  <h3 className="text-sm font-semibold mb-2">Rooms</h3>
+                  <ul className="space-y-1">
+                    {space.rooms.map((room) => (
+                      <li
+                        key={room.id}
+                        className="flex items-center gap-2 text-sm font-mono"
+                      >
+                        <span
+                          className="w-4 h-4 rounded-full"
+                          style={{ backgroundColor: room.color }}
+                        />
+                        {room.name} -{" "}
+                        <span className="text-muted-foreground">
+                          {room.code}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <Separator />
+                <div className="px-4 py-2">
+                  <p className="font-semibold text-sm">
+                    {space.deviceCurrentLocations.length}{" "}
+                    <span className="text-muted-foreground font-normal">
+                      devices in this space
+                    </span>
+                  </p>
+                </div>
               </div>
             </Link>
           </li>
