@@ -298,6 +298,16 @@ export default function EditDevice() {
                       timeStyle: "medium",
                     })}
                   </p>
+                  <p className="text-sm font-semibold mt-1">
+                    {history.space.name}
+                  </p>
+                  <p className="flex items-center gap-1 font-semibold text-sm -ml-0.5 mt-0.5">
+                    <span
+                      className="w-3.5 h-3.5 rounded-full"
+                      style={{ background: history.room.color }}
+                    ></span>
+                    {history.room.name}
+                  </p>
                 </li>
               ))}
             </ul>
