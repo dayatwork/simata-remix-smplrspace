@@ -289,6 +289,11 @@ export default function EditDevice() {
             </div>
           </TabsContent>
           <TabsContent value="movement-histories">
+            {device.locationHistories.length === 0 && (
+              <div className="flex items-center justify-center h-20 border rounded-lg border-dashed">
+                <p className="text-muted-foreground text-sm">No history</p>
+              </div>
+            )}
             <ul className="space-y-2">
               {device.locationHistories.map((history) => (
                 <li key={history.id} className="border rounded-lg px-3 py-1">
