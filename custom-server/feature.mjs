@@ -53,6 +53,15 @@ export async function uploadDeviceLocation(client, { deviceCode, roomCode }) {
       },
     });
 
+    await tx.deviceLocationHistory.create({
+      data: {
+        deviceId: currentLocation.deviceId,
+        roomId: currentLocation.roomId,
+        spaceId: currentLocation.spaceId,
+        timestamp: currentLocation.timestamp,
+      },
+    });
+
     // Publish to MQTT
     const payload = {
       id: device.id.toString(),

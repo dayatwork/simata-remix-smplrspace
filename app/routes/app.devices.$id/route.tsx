@@ -122,7 +122,15 @@ export async function loader({ params }: LoaderFunctionArgs) {
     return redirect("/app/devices");
   }
 
-  const device = await prisma.device.findUnique({ where: { id: Number(id) } });
+  const device = await prisma.device.findUnique({
+    where: { id: Number(id) },
+    include: {
+      locationHistories: {
+        include: { room: true, space: true },
+        orderBy: { timestamp: "desc" },
+      },
+    },
+  });
 
   if (!device) {
     return redirect("/app/devices");
@@ -280,7 +288,20 @@ export default function EditDevice() {
               </Button>
             </div>
           </TabsContent>
-          <TabsContent value="device-movement-histories"></TabsContent>
+          <TabsContent value="movement-histories">
+            <ul className="space-y-2">
+              {device.locationHistories.map((history) => (
+                <li key={history.id} className="border rounded-lg px-3 py-1">
+                  <p className="text-sm text-muted-foreground">
+                    {new Date(history.timestamp).toLocaleString("en-US", {
+                      dateStyle: "medium",
+                      timeStyle: "medium",
+                    })}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </TabsContent>
         </Tabs>
       </aside>
     </>
