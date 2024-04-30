@@ -384,8 +384,8 @@ export default function RoomForm(props: Props) {
           {props.intent === "edit-room" ? (
             <Button
               type="button"
-              className="h-[30px]"
-              variant="destructive"
+              className="h-[30px] text-red-600 hover:bg-red-600/10 hover:text-red-600"
+              variant="ghost"
               onClick={() => {
                 setOpenDeleteModal(true);
                 setSelectedRoomId(props.room.id);
