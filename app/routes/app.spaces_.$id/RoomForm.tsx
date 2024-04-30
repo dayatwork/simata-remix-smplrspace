@@ -98,7 +98,7 @@ export default function RoomForm(props: Props) {
   const fetcherData = fetcher.data;
   const [form, fields] = useForm({
     // lastResult: fetcherData?.lastResult,
-    shouldValidate: "onBlur",
+    shouldValidate: "onSubmit",
     onValidate({ formData }) {
       return parseWithZod(formData, { schema });
     },
@@ -120,13 +120,15 @@ export default function RoomForm(props: Props) {
     }
   }, [fetcherData, form]);
 
-  const cornersPreviewPoints: { x: number; y: number }[] | null = fields.corners
-    .value
-    ? (fields.corners.value as { x: string; z: string }[]).map((c) => ({
-        x: Number(c.x),
-        y: -Number(c.z),
-      }))
-    : null;
+  const cornersPreviewPoints: { x: number; y: number }[] | null =
+    fields.corners.value && Array.isArray(fields.corners.value)
+      ? (fields.corners.value as { x: string; z: string }[])
+          .filter((c) => Boolean(c))
+          .map((c) => ({
+            x: Number(c.x),
+            y: -Number(c.z),
+          }))
+      : null;
 
   return (
     <>
@@ -252,7 +254,7 @@ export default function RoomForm(props: Props) {
             Corners
           </legend>
           {cornersPreviewPoints ? (
-            <div className="w-full bg-green-100 mb-2">
+            <div className="w-full bg-green-100 mb-2 flex h-[150px]">
               <Polygon
                 points={cornersPreviewPoints}
                 fillColor={fields.color.value}
@@ -318,6 +320,8 @@ export default function RoomForm(props: Props) {
                         X
                       </Label>
                       <Input
+                        // eslint-disable-next-line jsx-a11y/no-autofocus
+                        autoFocus
                         type="number"
                         className="h-[30px] focus-visible:ring-0"
                         name={cornerFields.x.name}
@@ -356,7 +360,12 @@ export default function RoomForm(props: Props) {
             })}
             <button
               className="text-xs font-semibold border px-3 py-1 rounded-md inline-flex items-center hover:bg-accent w-full justify-center"
-              onClick={() => form.insert({ name: fields.corners.name })}
+              onClick={() => {
+                form.insert({
+                  name: fields.corners.name,
+                });
+              }}
+              type="button"
             >
               <PlusIcon className="w-3 h-3 mr-1" />
               Add Corner

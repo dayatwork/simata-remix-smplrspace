@@ -89,7 +89,7 @@ model DeviceLocationHistory {
   deviceId  Int
   space     Space    @relation(fields: [spaceId], references: [id], onDelete: Cascade)
   spaceId   Int
-  room      Room     @relation(fields: [roomId], references: [id])
+  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
   roomId    Int
   timestamp DateTime @default(now())
 
