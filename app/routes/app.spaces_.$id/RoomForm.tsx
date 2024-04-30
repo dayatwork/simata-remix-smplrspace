@@ -3,15 +3,17 @@ import { parseWithZod } from "@conform-to/zod";
 import { Room } from "@prisma/client";
 import { SerializeFrom } from "@remix-run/node";
 import { useFetcher } from "@remix-run/react";
-import { PlusIcon, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, PlusIcon, Trash2 } from "lucide-react";
 import { z } from "zod";
+import { useEffect, useState } from "react";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
+
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label, labelVariants } from "~/components/ui/label";
 import { cn } from "~/lib/utils";
 import { Corner } from "~/services/room.server";
 import { action as spaceAction } from "./route";
-import { useEffect, useState } from "react";
 // import toast from "react-hot-toast";
 import {
   Dialog,
@@ -20,6 +22,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
+import { Polygon } from "~/components/Polygon";
+import { checkIsValidPolygon } from "~/utils/polygon";
 
 export const schema = z.discriminatedUnion("_intent", [
   z.object({
@@ -28,24 +32,38 @@ export const schema = z.discriminatedUnion("_intent", [
     name: z.string(),
     color: z.string(),
     code: z.string(),
-    corners: z.array(
-      z.object({
-        x: z.number(),
-        z: z.number(),
-      })
-    ),
+    corners: z
+      .array(
+        z.object({
+          x: z.number(),
+          z: z.number(),
+        })
+      )
+      .refine((corners) => {
+        const { valid } = checkIsValidPolygon(
+          corners.map((c) => ({ x: c.x, y: c.z }))
+        );
+        return valid;
+      }, "Invalid polygon!"),
   }),
   z.object({
     _intent: z.literal("create-room"),
     name: z.string(),
     color: z.string(),
     code: z.string(),
-    corners: z.array(
-      z.object({
-        x: z.number(),
-        z: z.number(),
-      })
-    ),
+    corners: z
+      .array(
+        z.object({
+          x: z.number(),
+          z: z.number(),
+        })
+      )
+      .refine((corners) => {
+        const { valid } = checkIsValidPolygon(
+          corners.map((c) => ({ x: c.x, y: c.z }))
+        );
+        return valid;
+      }, "Invalid polygon!"),
   }),
   z.object({
     _intent: z.literal("delete-room"),
@@ -72,6 +90,7 @@ export default function RoomForm(props: Props) {
   const fetcher = useFetcher<typeof spaceAction>({ key: props.intent });
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
+  const [animationParent] = useAutoAnimate();
 
   // const navigation = useNavigation();
   // const submitting = navigation.state !== "idle";
@@ -100,6 +119,14 @@ export default function RoomForm(props: Props) {
       setOpenDeleteModal(false);
     }
   }, [fetcherData, form]);
+
+  const cornersPreviewPoints: { x: number; y: number }[] | null = fields.corners
+    .value
+    ? (fields.corners.value as { x: string; z: string }[]).map((c) => ({
+        x: Number(c.x),
+        y: -Number(c.z),
+      }))
+    : null;
 
   return (
     <>
@@ -224,19 +251,69 @@ export default function RoomForm(props: Props) {
           <legend className={cn(labelVariants(), "mb-2 text-xs")}>
             Corners
           </legend>
-          <div className="p-2 space-y-2">
+          {cornersPreviewPoints ? (
+            <div className="w-full bg-green-100 mb-2">
+              <Polygon
+                points={cornersPreviewPoints}
+                fillColor={fields.color.value}
+              />
+            </div>
+          ) : null}
+          <div className="flex w-full px-2 mb-1">
+            <div className="w-14"></div>
+            <div className="grid grid-cols-2 gap-2 flex-1">
+              <p className="text-center font-semibold text-xs">X</p>
+              <p className="text-center font-semibold text-xs">Z</p>
+            </div>
+            <div className="w-9"></div>
+          </div>
+          <div className="px-2 pb-2 space-y-1" ref={animationParent}>
             {corners.map((corner, index) => {
               const cornerFields = corner.getFieldset();
 
+              const handleUpClick = (index: number) => {
+                form.reorder({
+                  name: fields.corners.name,
+                  from: index,
+                  to: index - 1,
+                });
+              };
+              const handleDownClick = (index: number) => {
+                form.reorder({
+                  name: fields.corners.name,
+                  from: index,
+                  to: index + 1,
+                });
+              };
+
               return (
-                <div key={corner.key} className="flex gap-2 items-end">
-                  <div className="grid grid-cols-2 gap-2 items-end flex-1">
+                <div key={corner.key} className="flex gap-1 items-end">
+                  <div className="flex gap-0.5 mb-1">
+                    <button
+                      className="h-6 w-6 flex items-center justify-center border rounded hover:bg-accent disabled:bg-neutral-200 disabled:text-neutral-400"
+                      disabled={index === 0}
+                      onClick={() => handleUpClick(index)}
+                      type="button"
+                    >
+                      <ArrowUp className="w-3 h-3" />
+                    </button>
+                    <button
+                      className="h-6 w-6 flex items-center justify-center border rounded hover:bg-accent disabled:bg-neutral-200 disabled:text-neutral-400"
+                      disabled={index === corners.length - 1}
+                      onClick={() => handleDownClick(index)}
+                      type="button"
+                    >
+                      <ArrowDown className="w-3 h-3" />
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-1 items-end flex-1">
                     <div className="grid gap-1">
                       <Label
-                        className={cn(
-                          "text-xs text-center mb-1",
-                          index !== 0 && "sr-only"
-                        )}
+                        className="sr-only"
+                        // className={cn(
+                        //   "text-xs text-center mb-1",
+                        //   index !== 0 && "sr-only"
+                        // )}
                       >
                         X
                       </Label>
@@ -249,10 +326,11 @@ export default function RoomForm(props: Props) {
                     </div>
                     <div className="grid gap-1">
                       <Label
-                        className={cn(
-                          "text-xs text-center mb-1",
-                          index !== 0 && "sr-only"
-                        )}
+                        // className={cn(
+                        //   "text-xs text-center mb-1",
+                        //   index !== 0 && "sr-only"
+                        // )}
+                        className="sr-only"
                       >
                         Z
                       </Label>
@@ -277,12 +355,20 @@ export default function RoomForm(props: Props) {
               );
             })}
             <button
-              className="text-xs font-semibold border px-3 py-1 rounded-md inline-flex items-center hover:bg-accent"
+              className="text-xs font-semibold border px-3 py-1 rounded-md inline-flex items-center hover:bg-accent w-full justify-center"
               onClick={() => form.insert({ name: fields.corners.name })}
             >
               <PlusIcon className="w-3 h-3 mr-1" />
               Add Corner
             </button>
+            {fields.corners.errors ? (
+              <p
+                role="alert"
+                className="text-xs text-red-600 font-semibold pt-2 text-center"
+              >
+                {fields.corners.errors}
+              </p>
+            ) : null}
           </div>
         </fieldset>
         <div className="flex justify-between  pt-2">

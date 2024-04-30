@@ -21,6 +21,7 @@ import toast from "react-hot-toast";
 import ShortUniqueId from "short-unique-id";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { s3Client } from "~/lib/s3.server";
+// import { checkIsValidPolygon } from "~/utils/polygon";
 
 const validIntents = [
   "create-room",
@@ -69,6 +70,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
     }
 
     const { code, color, corners, name } = submission.value;
+
     try {
       const room = await createRoom({
         spaceId: Number(id),
@@ -123,6 +125,25 @@ export async function action({ request, params }: ActionFunctionArgs) {
     }
 
     const { code, color, corners, name, roomId } = submission.value;
+
+    // const { valid, invalidCause } = checkIsValidPolygon(
+    //   corners.map((c) => ({ x: c.x, y: c.z }))
+    // );
+
+    // console.log({ valid, invalidCause });
+
+    // if (!valid) {
+    //   if (submission.value._intent !== "edit-room") {
+    //     return json({
+    //       success: false,
+    //       lastResult: submission.reply({ formErrors: [invalidCause] }),
+    //       data: null,
+    //       timestamp: new Date(),
+    //       message: "Failed to edit room. Invalid intent",
+    //       intent,
+    //     });
+    //   }
+    // }
 
     try {
       const room = await editRoom({ id: roomId, code, color, corners, name });

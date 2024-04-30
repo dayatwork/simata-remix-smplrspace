@@ -46,7 +46,7 @@ Props) {
   }, [createRoomFetcherData?.success]);
 
   return (
-    <div className="w-72 border-l border-gray-200 p-4 flex flex-col gap-2 h-[calc(100vh-60px)] overflow-auto">
+    <div className="w-80 border-l border-gray-200 p-4 flex flex-col gap-2 h-[calc(100vh-60px)] overflow-auto">
       <Tabs defaultValue="rooms" className="w-full flex-1">
         <TabsList>
           <TabsTrigger value="space">Space</TabsTrigger>
