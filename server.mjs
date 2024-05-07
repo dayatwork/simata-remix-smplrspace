@@ -35,21 +35,30 @@ const client = mqtt.connect(process.env.VITE_MQTT_URL, {
 });
 
 client.on("connect", () => {
-  client.subscribe("sensor-data");
+  client.subscribe("simata/#");
 });
 
 client.on("message", (topic, message) => {
-  if (message && topic === "sensor-data") {
+  const topicSegment = topic.split("/");
+  // const spaceCode = topicSegment[1];
+  const roomCode = topicSegment[1];
+
+  if (message && roomCode) {
     const messageObj = JSON.parse(message);
 
-    if (messageObj.apiKey !== process.env.MQTT_API_KEY) return;
+    uploadDeviceLocation(client, {
+      deviceCode: messageObj.data.idHex,
+      roomCode,
+    });
 
-    if (messageObj.roomCode && messageObj.deviceCode) {
-      uploadDeviceLocation(client, {
-        deviceCode: messageObj.deviceCode,
-        roomCode: messageObj.roomCode,
-      });
-    }
+    // if (messageObj.apiKey !== process.env.MQTT_API_KEY) return;
+
+    // if (messageObj.roomCode && messageObj.deviceCode) {
+    //   uploadDeviceLocation(client, {
+    //     deviceCode: messageObj.deviceCode,
+    //     roomCode: messageObj.roomCode,
+    //   });
+    // }
   }
 });
 
