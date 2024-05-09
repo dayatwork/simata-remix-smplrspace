@@ -3,7 +3,7 @@ import { randomPointInsidePolygon } from "./util.mjs";
 
 export async function uploadDeviceLocation(client, { deviceCode, roomCode }) {
   const result = await prisma.$transaction(async (tx) => {
-    const device = await tx.device.findUnique({
+    const device = await tx.device.findFirst({
       where: { code: deviceCode },
       include: { currentLocation: true },
     });

@@ -41,7 +41,9 @@ export const schema = z.discriminatedUnion("_intent", [
     code: z.string(),
     description: z.string(),
     color: z.string().optional(),
-    image: z.instanceof(File, { message: "Image preview is required" }),
+    image: z
+      .instanceof(File, { message: "Image preview is required" })
+      .optional(),
   }),
   z.object({
     _intent: z.literal("delete-device"),
@@ -65,21 +67,24 @@ export async function action({ request, params }: ActionFunctionArgs) {
   if (submission.value._intent === "edit-device") {
     const { code, description, name, color, image } = submission.value;
 
-    const uid = new ShortUniqueId({ length: 10 });
-    const fileId = uid.randomUUID();
-    const fileName = `devices/${fileId}.${image.name.split(".").slice(-1)}`;
+    let url: string | undefined;
 
-    const command = new PutObjectCommand({
-      Bucket: process.env.S3_BUCKET_NAME,
-      Key: fileName,
-      Body: Buffer.from(await image.arrayBuffer()),
-      ContentType: image.type,
-      ACL: "public-read",
-    });
+    if (image) {
+      const uid = new ShortUniqueId({ length: 10 });
+      const fileId = uid.randomUUID();
+      const fileName = `devices/${fileId}.${image.name.split(".").slice(-1)}`;
 
-    await s3Client.send(command);
+      const command = new PutObjectCommand({
+        Bucket: process.env.S3_BUCKET_NAME,
+        Key: fileName,
+        Body: Buffer.from(await image.arrayBuffer()),
+        ContentType: image.type,
+        ACL: "public-read",
+      });
 
-    const url = `${process.env.S3_END_POINT}/${process.env.S3_BUCKET_NAME}/${fileName}`;
+      await s3Client.send(command);
+      url = `${process.env.S3_END_POINT}/${process.env.S3_BUCKET_NAME}/${fileName}`;
+    }
 
     try {
       await prisma.device.update({

@@ -38,18 +38,25 @@ client.on("connect", () => {
   client.subscribe("simata/#");
 });
 
-client.on("message", (topic, message) => {
+client.on("message", async (topic, message) => {
   const topicSegment = topic.split("/");
   // const spaceCode = topicSegment[1];
   const roomCode = topicSegment[1];
 
+  console.log("topic", topic);
+  console.log("message", JSON.parse(message));
+
   if (message && roomCode) {
     const messageObj = JSON.parse(message);
 
-    uploadDeviceLocation(client, {
-      deviceCode: messageObj.data.idHex,
-      roomCode,
-    });
+    try {
+      await uploadDeviceLocation(client, {
+        deviceCode: messageObj.data.idHex,
+        roomCode,
+      });
+    } catch (error) {
+      console.log("error", error);
+    }
 
     // if (messageObj.apiKey !== process.env.MQTT_API_KEY) return;
 
